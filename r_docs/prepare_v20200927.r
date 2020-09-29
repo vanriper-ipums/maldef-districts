@@ -3,7 +3,7 @@
 # # Date: 2020-09-28
 # 
 # Load in the crosswalk that Steven Ochoa (MALDEF) provided me on 2020-09-26. This crosswalk allows me to create demographic summaries for 2018 legislative
-# districts. 
+# districts for the v20200917 DP data. 
 
 require(data.table)
 require(tidyverse)
