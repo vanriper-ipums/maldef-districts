@@ -86,6 +86,8 @@ dp[, c("TABBLKST", "TABBLKCOU", "TABTRACTCE", "TABBLK") := NULL]
 setkey(dp, "gisjoin")
 
 #### Merge the nhgis crosswalk with dp data #### 
+# # I need to join the DP counts onto the SF1 counts so that I don't miss any SF data. There are blocks with SF counts but no people in DP.
+# After doing the join, I need to replace all NAs with 0
 dp <- dp[sf]
 
 #### Convert NAs to zeroes in dp dt #### 

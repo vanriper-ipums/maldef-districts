@@ -113,13 +113,7 @@ setkey(dp, "gisjoin")
 #### Merge the nhgis crosswalk with dp data #### 
 # I need to join the DP counts onto the SF1 counts so that I don't miss any SF data. There are blocks with SF counts but no people in DP.
 # After doing the join, I need to replace all NAs with 0
-#dp_sf <- sf[dp]
 dp <- dp[sf]
-
-#dp_sf_small <- dp_sf[, list(gisjoin, H72001_dp, H72001_sf)]
-#sf_dp_small <- sf_dp[, list(gisjoin, H72001_dp, H72001_sf)]
-#sf_dp_small <- dp[, list(gisjoin, H72001_dp, H72001_sf)]
-#dp <- sf[dp]
 
 #### Convert NAs to zeroes in dp dt #### 
 #state_n[is.na(state_n)] = 0
