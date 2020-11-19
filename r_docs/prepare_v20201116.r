@@ -10,7 +10,7 @@ require(tidyverse)
 
 #### Constants #### 
 data_path <- "data/"
-crosswalk_file <- "BlockEquiv_StateLegDistricts.csv"
+crosswalk_file <- "BlockEquiv_StateLegDistricts.csv.gz"
 col_class <- c("character", "character", "character", "character", "character", "character", "character", "character", "character", "character", "character", "character", "character", "character" )
 
 #### Load file ####
@@ -31,7 +31,7 @@ setkey(xwalk, gisjoin)
 #cty_count <- xwalk[, .N, by = .(State, cty)][order(State, cty)]
 
 #### Load in NHGIS SF redistricting data #### 
-sf <- fread("/pkg/ipums/misc/census-das/ppmf-tabs-20201116/data/sf1/nhgis1364_csv/sf_nhgis1364_ds172_2010_block.csv", sep = ",")
+sf <- fread("/pkg/ipums/misc/census-das/ppmf-tabs-20201116/data/sf1/nhgis1364_csv/sf_nhgis1364_ds172_2010_block.csv.gz", sep = ",")
 
 #### Set the key field as gisjoin ####
 setkey(sf, gisjoin)
@@ -86,29 +86,37 @@ dp[, c("TABBLKST", "TABBLKCOU", "TABTRACTCE", "TABBLK") := NULL]
 setkey(dp, "gisjoin")
 
 #### Merge the nhgis crosswalk with dp data #### 
-dp <- sf[dp]
+dp <- dp[sf]
+
+#### Convert NAs to zeroes in dp dt #### 
+dp[is.na(dp)] = 0
 
 #### Join up the xwalk to create the district counts #### 
 dp_xwalk <- xwalk[dp]
 
+#### Remove "name" from dp_xwalk ####
+dp_xwalk[, name := NULL]
+
 #### Create the summaries #### 
 congress2016 <- dp_xwalk[, lapply(.SD, sum),
                          by = .(State, Congress116),
-                         .SDcols = H72001_sf:H80010_dp]
+                         .SDcols = H72001_dp:H80010_sf]
 
 lowerSLD2018 <- dp_xwalk[, lapply(.SD, sum),
                          by = .(State, LowerSLD2018),
-                         .SDcols = H72001_sf:H80010_dp]
+                         .SDcols = H72001_dp:H80010_sf]
 
 upperSLD2018 <- dp_xwalk[, lapply(.SD, sum),
                          by = .(State, UpperSLD2018),
-                         .SDcols = H72001_sf:H80010_dp]
+                         .SDcols = H72001_dp:H80010_sf]
 
 #### Write out to CSV #### 
 fwrite(congress2016, "data/congress2016_v20201116.csv")
 fwrite(lowerSLD2018, "data/lowerSLD2018_v20201116.csv")
 fwrite(upperSLD2018, "data/upperSLD2018_v20201116.csv")
 
+#### Create ZIP archive ####
+zipr("data/v20201116_maldef_districts.zip", c("data/upperSLD2018_v20201116.csv","data/lowerSLD2018_v20201116.csv", "data/congress2016_v20201116.csv", "/pkg/ipums/misc/census-das/ppmf-tabs-20201116/data/output/nhgis_ppdd_20201116_codebook.txt"))
 
 
 
